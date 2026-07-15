@@ -41,7 +41,7 @@ int loginAdmin(){ // ini function login admin
     char pw[20];
     int n = 3;
 
-    printf("\n==== SISTEM MANAJEMEN HOTEL ====");
+    printf("\n==== SISTEM MANAJEMEN D'kost ====");
 
     while (n > 0) {
         printf("\nUsername: ");
