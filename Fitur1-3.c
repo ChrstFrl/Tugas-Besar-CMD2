@@ -10,8 +10,7 @@ typedef struct datakos // ini struct
     int no;
     char tipe[50];
     int harga;
-    int status; 
-} kamar;
+}kamar;
 
 kamar listkamar[limitKamar];
 int jmlkamar = 0;
@@ -19,7 +18,7 @@ int jmlkamar = 0;
 void bukadata(){ // ini file sequential bagian buka
     FILE *file = fopen(data, "rb");
     if (file == NULL) {
-        jmlkamar = 0;
+        jmlkamar=0;
         return;
     }
     jmlkamar = fread(listkamar, sizeof(kamar), limitKamar, file);
@@ -43,26 +42,28 @@ int loginAdmin(){ // ini function login admin
 
     printf("\n==== SISTEM MANAJEMEN HOTEL ====");
 
-    while (n > 0) {
+    while (n>0) {
         printf("\nUsername: ");
         scanf("%s", un);
-        printf("Password: ");
+        printf("\nPassword: ");
         scanf("%s", pw);
 
         if (strcmp (un, "admin") == 0 && strcmp(pw, "6767") == 0)
         {
             printf("\nLogin Sukses!!!");
-            printf("\nHaloooo Admin!\n");
+            printf("\nHaloooo Admin!");
+
             return 1;
-        } else {
+        }else {
             n--;
             printf("\nLogin Gagal!!!");
             printf("\nSisa percobaan: %d", n);
         }
+        
     }
 
-    printf("\nPercobaan login tidak wajar terdeteksi!!!");
-    printf("\nTerminating program..........\n");
+    printf("\n Percobaan login tidak wajar terdeteksi!!!");
+    printf("Terminating program..........");
     return 0;
 }
 
@@ -79,12 +80,10 @@ void add() { // ini tambah kamar lek
     scanf(" %[^\n]", listkamar[jmlkamar].tipe);
     printf("Harga      : ");
     scanf("%d", &listkamar[jmlkamar].harga);
-    
-    listkamar[jmlkamar].status = 0; 
 
     jmlkamar++;
     simpandata(); // langsung simpan
-    printf("[+] Data kamar berhasil ditambahkan (Status: Kosong)!\n");
+    printf("[+] Data kamar berhasil ditambahkan!\n");
 }
 
 void upd() { //ini perbaharui kamar
@@ -148,38 +147,6 @@ void del() { //ini hapus kamar
     }
 }
 
-void ubahStatus() { 
-    int noKamar, index = -1;
-    if (jmlkamar == 0) {
-        printf("\n[-] Belum ada data kamar!\n");
-        return;
-    }
-
-    printf("\n=== Ubah Status Kamar ===");
-    printf("\nMasukkan No Kamar: ");
-    scanf("%d", &noKamar);
-
-    for (int i = 0; i < jmlkamar; i++) {
-        if (listkamar[i].no == noKamar) {
-            index = i;
-            break;
-        }
-    }
-
-    if (index != -1) {
-        if (listkamar[index].status == 0) {
-            listkamar[index].status = 1;
-            printf("Status Kamar %d sekarang menjadi: TERISI\n", noKamar);
-        } else {
-            listkamar[index].status = 0;
-            printf("Status Kamar %d sekarang menjadi: KOSONG\n", noKamar);
-        }
-        simpandata(); 
-    } else {
-        printf("[-] Kamar nomor %d tidak ditemukan!\n", noKamar);
-    }
-}
-
 void ls() {
     if (jmlkamar == 0) {
         printf("\n[-] Belum ada data kamar!\n");
@@ -202,19 +169,12 @@ void ls() {
     }
 
     printf("\n=== Daftar Kamar (Harga Termurah) ===\n");
-    printf("No   | Tipe Kamar             | Harga       | Status\n");
-    printf("----------------------------------------------------------\n");
+    printf("No   | Tipe Kamar             | Harga\n");
+    printf("----------------------------------------\n");
     for (int i = 0; i < jmlkamar; i++) {
-        char statusTeks[10];
-        if (temp[i].status == 1) {
-            strcpy(statusTeks, "Terisi");
-        } else {
-            strcpy(statusTeks, "Kosong");
-        }
-        
-        printf("%-4d | %-22s | Rp %-8d | %s\n", temp[i].no, temp[i].tipe, temp[i].harga, statusTeks);
+        printf("%-4d | %-22s | Rp %d\n", temp[i].no, temp[i].tipe, temp[i].harga);
     }
-    printf("----------------------------------------------------------\n");
+    printf("----------------------------------------\n");
 }
 
 int main(){ //menu admin
@@ -233,8 +193,7 @@ int main(){ //menu admin
         printf("\n2. Hapus Kamar");
         printf("\n3. Perbaharui Kamar");
         printf("\n4. Tampilkan Daftar Kamar");
-        printf("\n5. Ubah Status Kamar (Kosong/Terisi)"); 
-        printf("\n6. Logout"); 
+        printf("\n5. Logout");
         printf("\nPilih menu: ");
         scanf("%d", &menu);
 
@@ -246,21 +205,17 @@ int main(){ //menu admin
         case 2: del(); break;
         case 3: upd(); break;
         case 4: ls(); break;
-        case 5: ubahStatus(); break; 
-        case 6: printf("Sampai jumpa admin! Semoga harimu menyenangkan.\n"); break;
+        case 5: printf("Sampai jumpa admin! Semoga harimu menyenangkan."); break;
         
-        default: 
-            printf("Menu tidak valid!\n"); 
-            break;
+        default: break;
         }
-
-        if (menu != 6) 
-        {
-            printf("\n");
-            system("pause");
-        }
+    if (menu !=5)
+    {
+        printf("\n");
+        system("pause");
+    }
     
-    } while (menu != 6); 
+    } while (menu !=5);
     
     return 0;
 }
