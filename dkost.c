@@ -6,7 +6,8 @@
 #define dataKamar "dbKamar.bin"
 #define dataPenyewa "dbPenyewa.bin"
 #define dataPengajuan "dbPengajuan.bin"
-
+#define dataBookmark "dbBookmark.bin"
+#define limitBookmark 1000
 
 typedef struct{
     int noKamar;
@@ -16,12 +17,13 @@ typedef struct{
     char status[20];   
 } Pengajuan;
 
-typedef struct datakos // ini struct
+typedef struct datakos
 {
     int no;
     char tipe[50];
     int harga;
-    int status; 
+    int status;        
+    int pengajuan;     
 } kamar;
 
 typedef struct {
@@ -29,8 +31,16 @@ typedef struct {
     char password[30];
 } Penyewa;
 
+typedef struct{
+    char username[30];
+    int noKamar;
+} Bookmark;
+
 kamar listkamar[limitKamar];
 int jmlkamar = 0;
+
+Bookmark listBookmark[limitBookmark];
+int jmlBookmark = 0;
 
 void bukaDataKamar();
 void ajukanPenyewaan();
@@ -38,6 +48,8 @@ void lihatStatusPengajuan(char username[]);
 void bukaDataBookmark();
 void bookmarkKamar(char username[]);
 void lihatBookmark(char username[]);
+void bukadata();
+void simpandata();
 
 void bukaDataKamar(){
     FILE *file = fopen(dataKamar, "rb");
@@ -139,6 +151,7 @@ void ajukanPenyewaan(){
         printf("\nNomor kamar tidak ditemukan!\n");
     }
 }
+
 void lihatStatusPengajuan(char username[]){
 
     FILE *file = fopen(dataPengajuan, "rb");
@@ -171,16 +184,6 @@ void lihatStatusPengajuan(char username[]){
         printf("\nAnda belum pernah mengajukan penyewaan.\n");
     }
 }
-#define dataBookmark "dbBookmark.bin"
-#define limitBookmark 1000
-
-typedef struct{
-    char username[30];
-    int noKamar;
-} Bookmark;
-
-Bookmark listBookmark[limitBookmark];
-int jmlBookmark = 0;
 
 void bukaDataBookmark(){
     FILE *file = fopen(dataBookmark, "rb");
@@ -193,11 +196,12 @@ void bukaDataBookmark(){
     jmlBookmark = fread(listBookmark, sizeof(Bookmark), limitBookmark, file);
     fclose(file);
 }
-// pointer
+
 void isiBookmark(Bookmark *b, int noKamar, char username[]){
     b->noKamar = noKamar;
     strcpy(b->username, username);
 }
+
 void bookmarkKamar(char username[]){
 
     bukaDataKamar();
@@ -235,7 +239,6 @@ void bookmarkKamar(char username[]){
         return;
     }
 
-    
     for(int i = 0; i < jmlBookmark; i++){
         if(strcmp(listBookmark[i].username, username) == 0 && listBookmark[i].noKamar == noKamar){
             printf("\nKamar ini sudah ada di bookmark Anda!\n");
@@ -259,6 +262,7 @@ void bookmarkKamar(char username[]){
 
     printf("\nKamar berhasil ditambahkan ke daftar bookmark!\n");
 }
+
 void lihatBookmark(char username[]){
 
     bukaDataBookmark();
@@ -381,48 +385,190 @@ void lihatDaftarKamarTersedia() {
     if (!ada) printf("\nTidak ada kamar yang tersedia.\n");
 }
 
-void cariKamar() {
-    bukaDataKamar();
+void cariKamar()
+{
+    int noCari;
+    int ketemu = 0;
+
+    bukadata(); 
+
+    if (jmlkamar == 0)
+    {
+        printf("\nBelum ada data kamar!\n");
+        return;
+    }
+
+    printf("\n=== PENCARIAN DATA KAMAR ===\n");
+    printf("Masukkan Nomor Kamar : ");
+    scanf("%d", &noCari);
+
+    for(int i = 0; i < jmlkamar; i++)
+    {
+        if(listkamar[i].no == noCari)
+        {
+            ketemu = 1;
+
+            printf("\n===== DATA KAMAR DITEMUKAN =====\n");
+            printf("Nomor Kamar : %d\n", listkamar[i].no);
+            printf("Tipe Kamar  : %s\n", listkamar[i].tipe);
+            printf("Harga       : Rp %d\n", listkamar[i].harga);
+
+            if(listkamar[i].status == 0)
+            {
+                printf("Status      : Kosong\n");
+            }
+            else
+            {
+                printf("Status      : Terisi\n");
+            }
+
+            break;
+        }
+    }
+
+    if(ketemu == 0)
+    {
+        printf("\nData kamar tidak ditemukan!\n");
+    }
+}
+
+void tampilPengajuan()
+{
+    if (jmlkamar == 0)
+    {
+        printf("\nBelum ada data kamar!\n");
+        return;
+    }
+
+    printf("\n========== DAFTAR PENGAJUAN ==========\n");
+
+    for(int i = 0; i < jmlkamar; i++)
+    {
+        printf("\nNomor Kamar : %d\n", listkamar[i].no);
+        printf("Tipe Kamar  : %s\n", listkamar[i].tipe);
+
+        printf("Status Pengajuan : ");
+
+        if(listkamar[i].pengajuan == 0)
+            printf("Menunggu\n");
+        else if(listkamar[i].pengajuan == 1)
+            printf("Disetujui\n");
+        else
+            printf("Ditolak\n");
+    }
+}
+
+void konfirmasiPengajuan()
+{
+    int noCari;
+    int pilihan;
+    int index = -1;
+
+    if(jmlkamar == 0)
+    {
+        printf("\nBelum ada data kamar!\n");
+        return;
+    }
+
+    tampilPengajuan();
+
+    printf("\nMasukkan Nomor Kamar : ");
+    scanf("%d", &noCari);
+
+    for(int i = 0; i < jmlkamar; i++)
+    {
+        if(listkamar[i].no == noCari)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if(index == -1)
+    {
+        printf("\nNomor kamar tidak ditemukan!\n");
+        return;
+    }
+
+    printf("\n1. Setujui Pengajuan");
+    printf("\n2. Tolak Pengajuan");
+    printf("\nPilihan : ");
+    scanf("%d", &pilihan);
+
+    if(pilihan == 1)
+    {
+        listkamar[index].pengajuan = 1;
+        listkamar[index].status = 1;
+
+        printf("\nPengajuan disetujui.");
+        printf("\nStatus kamar menjadi TERISI.\n");
+    }
+    else if(pilihan == 2)
+    {
+        listkamar[index].pengajuan = 2;
+        listkamar[index].status = 0;
+
+        printf("\nPengajuan ditolak.");
+        printf("\nStatus kamar tetap KOSONG.\n");
+    }
+    else
+    {
+        printf("\nPilihan tidak valid!\n");
+        return;
+    }
+
+    simpandata();
+}
+
+void lihatStatusKamar()
+{
+    bukadata();
 
     if (jmlkamar == 0) {
         printf("\nBelum ada data kamar!\n");
         return;
     }
 
-    int pilihan, ketemu = 0;
-    printf("\n========== CARI KAMAR ==========\n1. Nomor Kamar\n2. Tipe Kamar\nPilih : ");
+    int pilihan;
+    int ditemukan = 0;
+
+    printf("\n===== LIHAT STATUS KAMAR =====\n");
+    printf("1. Kamar Kosong\n");
+    printf("2. Kamar Terisi\n");
+    printf("Pilih : ");
     scanf("%d", &pilihan);
 
-    if (pilihan == 1) {
-        int cariNo;
-        printf("Masukkan Nomor Kamar : ");
-        scanf("%d", &cariNo);
+    if (pilihan != 1 && pilihan != 2) {
+        printf("\nPilihan tidak valid!\n");
+        return;
+    }
 
-        for (int i = 0; i < jmlkamar; i++) {
-            if (listkamar[i].no == cariNo) {
-                ketemu = 1;
-                printf("\nNo Kamar : %d\nTipe     : %s\nHarga    : Rp %d\nStatus   : %s\n", 
-                       listkamar[i].no, listkamar[i].tipe, listkamar[i].harga, listkamar[i].status == 0 ? "Kosong" : "Terisi");
-            }
-        }
-    } else if (pilihan == 2) {
-        char cariTipe[50];
-        printf("Masukkan Tipe Kamar : ");
-        scanf(" %[^\n]", cariTipe);
+    printf("\n=====================================================\n");
+    printf("%-10s %-20s %-12s %-10s\n",
+           "No", "Tipe", "Harga", "Status");
+    printf("=====================================================\n");
 
-        for (int i = 0; i < jmlkamar; i++) {
-            if (strstr(listkamar[i].tipe, cariTipe) != NULL) {
-                ketemu = 1;
-                printf("\nNo Kamar : %d\nTipe     : %s\nHarga    : Rp %d\nStatus   : %s\n", 
-                       listkamar[i].no, listkamar[i].tipe, listkamar[i].harga, listkamar[i].status == 0 ? "Kosong" : "Terisi");
-            }
+    for (int i = 0; i < jmlkamar; i++) {
+
+        if ((pilihan == 1 && listkamar[i].status == 0) ||
+            (pilihan == 2 && listkamar[i].status == 1)) {
+
+            ditemukan = 1;
+
+            printf("%-10d %-20s Rp %-8d %-10s\n",
+                   listkamar[i].no,
+                   listkamar[i].tipe,
+                   listkamar[i].harga,
+                   listkamar[i].status == 0 ? "Kosong" : "Terisi");
         }
     }
 
-    if (!ketemu) printf("\nKamar tidak ditemukan!\n");
+    if (!ditemukan) {
+        printf("\nData Tidak Ditemukan!\n");
+    }
 }
 
-void bukadata(){ // ini file sequential bagian buka
+void bukadata(){
     FILE *file = fopen(dataKamar, "rb");
     if (file == NULL) {
         jmlkamar = 0;
@@ -432,7 +578,7 @@ void bukadata(){ // ini file sequential bagian buka
     fclose(file);
 }
 
-void simpandata(){ // ini file sequential juga, tp bagian simpan
+void simpandata(){
     FILE *file = fopen(dataKamar, "wb");
     if(file == NULL){
         printf("\nGagal menyimpan data!!!");
@@ -442,7 +588,7 @@ void simpandata(){ // ini file sequential juga, tp bagian simpan
     fclose(file);
 }
 
-int loginAdmin(){ // ini function login admin 
+int loginAdmin(){
     char un[50];
     char pw[20];
     int n = 3;
@@ -472,7 +618,7 @@ int loginAdmin(){ // ini function login admin
     return 0;
 }
 
-void add() { // ini tambah kamar lek 
+void add() {
     if (jmlkamar >= limitKamar) {
         printf("\n[-] Kapasitas kamar sudah penuh!\n");
         return;
@@ -487,13 +633,14 @@ void add() { // ini tambah kamar lek
     scanf("%d", &listkamar[jmlkamar].harga);
     
     listkamar[jmlkamar].status = 0; 
+    listkamar[jmlkamar].pengajuan = 0;
 
     jmlkamar++;
-    simpandata(); // langsung simpan
+    simpandata();
     printf("[+] Data kamar berhasil ditambahkan (Status: Kosong)!\n");
 }
 
-void upd() { //ini perbaharui kamar
+void upd() {
     int noUpdate, index = -1;
     if (jmlkamar == 0) {
         printf("\n[-] Belum ada data kamar!\n");
@@ -524,7 +671,7 @@ void upd() { //ini perbaharui kamar
     }
 }
 
-void del() { //ini hapus kamar
+void del() {
     int noHapus, index = -1;
     if (jmlkamar == 0) {
         printf("\n[-] Belum ada data kamar!\n");
@@ -544,7 +691,7 @@ void del() { //ini hapus kamar
 
     if (index != -1) {
         for (int i = index; i < jmlkamar - 1; i++) {
-            listkamar[i] = listkamar[i + 1]; // Geser data
+            listkamar[i] = listkamar[i + 1];
         }
         jmlkamar--;
         simpandata();
@@ -597,7 +744,7 @@ void ls() {
         temp[i] = listkamar[i];
     }
 
-    for (int i = 0; i < jmlkamar - 1; i++) { //bubble sort
+    for (int i = 0; i < jmlkamar - 1; i++) {
         for (int j = 0; j < jmlkamar - i - 1; j++) {
             if (temp[j].harga > temp[j + 1].harga) {
                 kamar t = temp[j];
@@ -623,50 +770,116 @@ void ls() {
     printf("----------------------------------------------------------\n");
 }
 
-int main(){ //menu admin
-    if (!loginAdmin())
-    {
-        return 0;
-    }
+int main(){
+    int pilihanUtama;
+    char loggedInUser[30];
+
     bukadata();
 
-    int menu;
-    do
-    {
+    do {
         system("cls");
-        printf("\n==== Menu Manajemen D'Kost ====");
-        printf("\n1. Tambah Kamar");
-        printf("\n2. Hapus Kamar");
-        printf("\n3. Perbaharui Kamar");
-        printf("\n4. Tampilkan Daftar Kamar");
-        printf("\n5. Ubah Status Kamar (Kosong/Terisi)"); 
-        printf("\n6. Logout"); 
-        printf("\nPilih menu: ");
-        scanf("%d", &menu);
+        printf("\n==== SELAMAT DATANG DI SISTEM D'KOST ====\n");
+        printf("1. Login Admin\n");
+        printf("2. Login Penyewa\n");
+        printf("3. Registrasi Penyewa\n");
+        printf("4. Keluar\n");
+        printf("Pilih menu: ");
+        scanf("%d", &pilihanUtama);
 
-        system("cls");
+        switch(pilihanUtama) {
+            case 1:
+                if (loginAdmin()) {
+                    int menuAdmin;
+                    do {
+                        system("cls");
+                        printf("\n==== Menu Manajemen D'Kost (Admin) ====");
+                        printf("\n1. Tambah Kamar");
+                        printf("\n2. Hapus Kamar");
+                        printf("\n3. Perbaharui Kamar");
+                        printf("\n4. Tampilkan Daftar Kamar");
+                        printf("\n5. Ubah Status Kamar (Kosong/Terisi)");
+                        printf("\n6. Konfirmasi Pengajuan");
+                        printf("\n7. Logout");
+                        printf("\nPilih menu: ");
+                        scanf("%d", &menuAdmin);
 
-        switch (menu)
-        {
-        case 1: add(); break;
-        case 2: del(); break;
-        case 3: upd(); break;
-        case 4: ls(); break;
-        case 5: ubahStatus(); break; 
-        case 6: printf("Sampai jumpa admin! Semoga harimu menyenangkan.\n"); break;
-        
-        default: 
-            printf("Menu tidak valid!\n"); 
-            break;
+                        system("cls");
+
+                        switch (menuAdmin) {
+                            case 1: add(); break;
+                            case 2: del(); break;
+                            case 3: upd(); break;
+                            case 4: ls(); break;
+                            case 5: ubahStatus(); break;
+                            case 6: konfirmasiPengajuan(); break;
+                            case 7: printf("Sampai jumpa admin! Semoga harimu menyenangkan.\n"); break;
+                            default: printf("Menu tidak valid!\n"); break;
+                        }
+
+                        if (menuAdmin != 7) {
+                            printf("\n");
+                            system("pause");
+                        }
+                    } while (menuAdmin != 7);
+                }
+                break;
+
+            case 2:
+                if (loginPenyewa(loggedInUser)) {
+                    int menuPenyewa;
+                    do {
+                        system("cls");
+                        printf("\n==== Menu Penyewa ====");
+                        printf("\n1. Lihat Daftar Kamar Tersedia");
+                        printf("\n2. Cari Kamar");
+                        printf("\n3. Lihat Status Kamar");
+                        printf("\n4. Ajukan Penyewaan");
+                        printf("\n5. Lihat Status Pengajuan");
+                        printf("\n6. Bookmark Kamar");
+                        printf("\n7. Lihat Daftar Bookmark");
+                        printf("\n8. Logout");
+                        printf("\nPilih menu: ");
+                        scanf("%d", &menuPenyewa);
+
+                        system("cls");
+
+                        switch (menuPenyewa) {
+                            case 1: lihatDaftarKamarTersedia(); break;
+                            case 2: cariKamar(); break;
+                            case 3: lihatStatusKamar(); break;
+                            case 4: ajukanPenyewaan(); break;
+                            case 5: lihatStatusPengajuan(loggedInUser); break;
+                            case 6: bookmarkKamar(loggedInUser); break;
+                            case 7: lihatBookmark(loggedInUser); break;
+                            case 8: printf("Sampai jumpa, %s!\n", loggedInUser); break;
+                            default: printf("Menu tidak valid!\n"); break;
+                        }
+
+                        if (menuPenyewa != 8) {
+                            printf("\n");
+                            system("pause");
+                        }
+                    } while (menuPenyewa != 8);
+                }
+                break;
+
+            case 3:
+                system("cls");
+                registrasiPenyewa();
+                printf("\n");
+                system("pause");
+                break;
+
+            case 4:
+                printf("\nTerima kasih telah menggunakan sistem D'Kost!\n");
+                break;
+
+            default:
+                printf("\nPilihan tidak valid!\n");
+                system("pause");
+                break;
         }
+    } while (pilihanUtama != 4);
 
-        if (menu != 6) 
-        {
-            printf("\n");
-            system("pause");
-        }
-    
-    } while (menu != 6); 
-    
     return 0;
 }
