@@ -798,8 +798,11 @@ int main(){
                         printf("\n3. Perbaharui Kamar");
                         printf("\n4. Tampilkan Daftar Kamar");
                         printf("\n5. Ubah Status Kamar (Kosong/Terisi)");
-                        printf("\n6. Konfirmasi Pengajuan");
-                        printf("\n7. Logout");
+                        printf("\n6. Cari Kamar");
+                        printf("\n7. Lihat Status Kamar");
+                        printf("\n8. Tampil Pengajuan");
+                        printf("\n9. Konfirmasi Pengajuan");
+                        printf("\n10. Logout");
                         printf("\nPilih menu: ");
                         scanf("%d", &menuAdmin);
 
@@ -811,16 +814,19 @@ int main(){
                             case 3: upd(); break;
                             case 4: ls(); break;
                             case 5: ubahStatus(); break;
-                            case 6: konfirmasiPengajuan(); break;
-                            case 7: printf("Sampai jumpa admin! Semoga harimu menyenangkan.\n"); break;
+                            case 6: cariKamar(); break;
+                            case 7: lihatStatusKamar(); break;
+                            case 8: tampilPengajuan(); break;
+                            case 9: konfirmasiPengajuan(); break;
+                            case 10: printf("Sampai jumpa admin! Semoga harimu menyenangkan.\n"); break;
                             default: printf("Menu tidak valid!\n"); break;
                         }
 
-                        if (menuAdmin != 7) {
+                        if (menuAdmin != 10) {
                             printf("\n");
                             system("pause");
                         }
-                    } while (menuAdmin != 7);
+                    } while (menuAdmin != 10);
                 }
                 break;
 
