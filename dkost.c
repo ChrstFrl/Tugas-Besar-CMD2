@@ -518,27 +518,6 @@ void konfirmasiPengajuan()
     }
 
     simpandata();
-
-    FILE *filePengajuan = fopen(dataPengajuan, "r+b"); // r+b digunakan agar bisa read dan write di file yang sama
-    if (filePengajuan != NULL) {
-        Pengajuan p;
-        while (fread(&p, sizeof(Pengajuan), 1, filePengajuan) == 1) {
-            if (p.noKamar == noCari && strcmp(p.status, "Menunggu") == 0) {
-                
-                if (pilihan == 1) {
-                    strcpy(p.status, "Disetujui");
-                } else if (pilihan == 2) {
-                    strcpy(p.status, "Ditolak");
-                }
-                
-                fseek(filePengajuan, -sizeof(Pengajuan), SEEK_CUR);
-                fwrite(&p, sizeof(Pengajuan), 1, filePengajuan);
-                break; 
-            }
-        }
-        fclose(filePengajuan);
-    }
-
 }
 
 void lihatStatusKamar()
